@@ -1,0 +1,13 @@
+{
+  "common": {
+    "home": "홈",
+    "about": "소개",
+    "contact": "연락처",
+    "database": "데이터베이스",
+    "analysis": "분석",
+    "settings": "설정"
+  },
+  "nav": {
+    "language": "언어"
+  }
+}

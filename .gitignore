@@ -1,0 +1,49 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+dist/
+build/
+
+# misc
+.DS_Store
+*.pem
+*.log
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# env files
+.env*.local
+.env
+.env.local
+.env.production
+
+# ts build
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# CDK assets (removed)
+.cdk.staging
+cdk.out
+cdk.context.json
+
+# Music files (stored in Google Drive)
+public/music/*.mp3
+
+# Cache
+.cache/
+.parcel-cache/
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Large engine files - exclude if needed (optional)
+# public/engines/stockfish-17/*.wasm
+
+# Embedded repositories
+chesspoint_final/

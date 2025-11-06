@@ -1,0 +1,13 @@
+services:
+  chesspoint:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    image: chesspoint:0.1.0
+    container_name: chesspoint
+    ports:
+      - "10080:80"
+      - "10443:443"
+    volumes:
+      - ./certs/chesspoint.io.pem.autosigned:/etc/letsencrypt/live/chesspoint.io/fullchain.pem
+      - ./certs/chesspoint.io.key.autosigned:/etc/letsencrypt/live/chesspoint.io/privkey.pem

@@ -1,0 +1,13 @@
+{
+  "common": {
+    "home": "Home",
+    "about": "Chi siamo",
+    "contact": "Contatto",
+    "database": "Database",
+    "analysis": "Analisi",
+    "settings": "Impostazioni"
+  },
+  "nav": {
+    "language": "Lingua"
+  }
+}

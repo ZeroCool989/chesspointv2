@@ -1,0 +1,13 @@
+{
+  "common": {
+    "home": "ホーム",
+    "about": "について",
+    "contact": "お問い合わせ",
+    "database": "データベース",
+    "analysis": "分析",
+    "settings": "設定"
+  },
+  "nav": {
+    "language": "言語"
+  }
+}

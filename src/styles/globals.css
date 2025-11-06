@@ -1,0 +1,446 @@
+/* Chesspoint "Monarch Knights Set" Global Styles */
+
+/* Remove blue autofill background from all input fields */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-text-fill-color: #000000 !important;
+  color: #000000 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+:root {
+  /* Chesspoint Color Variables */
+  --chesspoint-primary: #7B5AF0;
+  --chesspoint-primary-light: #A78BFA;
+  --chesspoint-primary-dark: #5B21B6;
+  --chesspoint-secondary: #A78BFA;
+  --chesspoint-surface: #EDE7FF;
+  --chesspoint-surface-dark: #1B1B1F;
+  --chesspoint-text-strong: #1B1B1F;
+  --chesspoint-text-light: #6B7280;
+  --chesspoint-success: #22C55E;
+  --chesspoint-error: #EF4444;
+  --chesspoint-warning: #F59E0B;
+  --chesspoint-info: #3B82F6;
+  --chesspoint-background: #FAFAFA;
+  --chesspoint-background-dark: #0F0F0F;
+  --chesspoint-border: rgba(124, 90, 240, 0.15);
+  --chesspoint-border-strong: rgba(124, 90, 240, 0.3);
+  
+  /* Backdrop blur and translucency */
+  --chesspoint-backdrop-blur: blur(10px);
+  --chesspoint-panel-bg: rgba(255, 255, 255, 0.8);
+  --chesspoint-panel-bg-dark: rgba(27, 27, 31, 0.8);
+  
+  /* Spacing and sizing */
+  --chesspoint-border-radius: 12px;
+  --chesspoint-border-radius-sm: 8px;
+  --chesspoint-border-radius-lg: 16px;
+  --chesspoint-spacing-xs: 4px;
+  --chesspoint-spacing-sm: 8px;
+  --chesspoint-spacing-md: 16px;
+  --chesspoint-spacing-lg: 24px;
+  --chesspoint-spacing-xl: 32px;
+  
+  /* Shadows */
+  --chesspoint-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --chesspoint-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --chesspoint-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --chesspoint-shadow-primary: 0 4px 12px rgba(124, 90, 240, 0.15);
+  --chesspoint-shadow-primary-hover: 0 6px 16px rgba(124, 90, 240, 0.25);
+}
+
+/* Dark mode variables */
+[data-theme="dark"],
+.dark-mode {
+  --chesspoint-panel-bg: rgba(15, 15, 15, 0.9);
+  --chesspoint-background: #0F0F0F;
+  --chesspoint-text-strong: #FFFFFF;
+  --chesspoint-text-light: #B0B0B0;
+  --chesspoint-border: rgba(255, 255, 255, 0.1);
+  --chesspoint-border-strong: rgba(255, 255, 255, 0.2);
+}
+
+/* Dark mode body styling */
+body.dark-mode {
+  background: #0F0F0F !important;
+  color: #FFFFFF !important;
+}
+
+/* Dark mode panel styling */
+.dark-mode .chesspoint-panel {
+  background: rgba(15, 15, 15, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+}
+
+.dark-mode .chesspoint-card {
+  background: rgba(15, 15, 15, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+}
+
+/* Dark mode text improvements */
+.dark-mode .chesspoint-heading {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.dark-mode .chesspoint-text {
+  color: #B0B0B0 !important;
+}
+
+/* Dark mode button improvements */
+.dark-mode .chesspoint-button-outlined {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #7B5AF0 !important;
+}
+
+.dark-mode .chesspoint-button-outlined:hover {
+  background: rgba(124, 90, 240, 0.1) !important;
+  border-color: #7B5AF0 !important;
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background: var(--chesspoint-background);
+  color: var(--chesspoint-text-strong);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Chesspoint Panel Styles */
+.chesspoint-panel {
+  background: var(--chesspoint-panel-bg);
+  backdrop-filter: var(--chesspoint-backdrop-blur);
+  border: 1px solid var(--chesspoint-border);
+  border-radius: var(--chesspoint-border-radius);
+  box-shadow: var(--chesspoint-shadow-md);
+  padding: var(--chesspoint-spacing-lg);
+}
+
+.chesspoint-panel-translucent {
+  background: var(--chesspoint-panel-bg);
+  backdrop-filter: var(--chesspoint-backdrop-blur);
+  border: 1px solid var(--chesspoint-border);
+  border-radius: var(--chesspoint-border-radius);
+}
+
+/* Chesspoint Button Styles */
+.chesspoint-button {
+  border-radius: var(--chesspoint-border-radius);
+  font-weight: 500;
+  text-transform: none;
+  box-shadow: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.chesspoint-button:hover {
+  box-shadow: var(--chesspoint-shadow-primary);
+}
+
+.chesspoint-button-primary {
+  background: var(--chesspoint-primary);
+  color: #FFFFFF;
+  border: none;
+}
+
+.chesspoint-button-primary:hover {
+  background: var(--chesspoint-primary-dark);
+  box-shadow: var(--chesspoint-shadow-primary-hover);
+}
+
+.chesspoint-button-outlined {
+  background: transparent;
+  color: var(--chesspoint-primary);
+  border: 1px solid var(--chesspoint-border-strong);
+}
+
+.chesspoint-button-outlined:hover {
+  background: rgba(124, 90, 240, 0.04);
+  border-color: var(--chesspoint-primary);
+}
+
+.chesspoint-button-ghost {
+  background: transparent;
+  color: var(--chesspoint-primary);
+  border: none;
+}
+
+.chesspoint-button-ghost:hover {
+  background: rgba(124, 90, 240, 0.04);
+}
+
+/* Chesspoint Card Styles */
+.chesspoint-card {
+  background: var(--chesspoint-panel-bg);
+  backdrop-filter: var(--chesspoint-backdrop-blur);
+  border: 1px solid var(--chesspoint-border);
+  border-radius: var(--chesspoint-border-radius);
+  box-shadow: var(--chesspoint-shadow-md);
+  padding: var(--chesspoint-spacing-lg);
+}
+
+/* Chesspoint Focus Styles */
+.chesspoint-focus {
+  outline: 2px solid var(--chesspoint-primary);
+  outline-offset: 2px;
+}
+
+/* Chesspoint Move Tracer Styles */
+.chesspoint-move-tracer {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.chesspoint-move-tracer-line {
+  stroke: var(--chesspoint-primary);
+  stroke-width: 2;
+  stroke-dasharray: 4, 4;
+  animation: chesspoint-dash 1s linear infinite;
+}
+
+.chesspoint-move-tracer-arrow {
+  fill: var(--chesspoint-primary);
+}
+
+@keyframes chesspoint-dash {
+  to {
+    stroke-dashoffset: -8;
+  }
+}
+
+/* Chesspoint Board Highlight Styles */
+.chesspoint-square-selected {
+  background: rgba(124, 90, 240, 0.3) !important;
+  box-shadow: inset 0 0 0 2px var(--chesspoint-primary);
+}
+
+.chesspoint-square-legal-move {
+  background: rgba(124, 90, 240, 0.1) !important;
+}
+
+.chesspoint-square-legal-move::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--chesspoint-primary);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.chesspoint-square-capture {
+  background: rgba(124, 90, 240, 0.1) !important;
+}
+
+.chesspoint-square-capture::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid var(--chesspoint-primary);
+  border-radius: 50%;
+}
+
+.chesspoint-square-last-move {
+  background: rgba(124, 90, 240, 0.2) !important;
+  animation: chesspoint-pulse 1s ease-in-out;
+}
+
+@keyframes chesspoint-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Chesspoint Evaluation Bar */
+.chesspoint-eval-bar {
+  background: linear-gradient(
+    to right,
+    var(--chesspoint-error) 0%,
+    var(--chesspoint-warning) 25%,
+    var(--chesspoint-info) 50%,
+    var(--chesspoint-success) 75%,
+    var(--chesspoint-success) 100%
+  );
+  border-radius: var(--chesspoint-border-radius-sm);
+  height: 4px;
+  transition: all 0.3s ease;
+}
+
+.chesspoint-eval-bar-white {
+  background: linear-gradient(
+    to left,
+    var(--chesspoint-error) 0%,
+    var(--chesspoint-warning) 25%,
+    var(--chesspoint-info) 50%,
+    var(--chesspoint-success) 75%,
+    var(--chesspoint-success) 100%
+  );
+}
+
+/* Chesspoint Move Log Styles */
+.chesspoint-move-log {
+  background: var(--chesspoint-panel-bg);
+  backdrop-filter: var(--chesspoint-backdrop-blur);
+  border: 1px solid var(--chesspoint-border);
+  border-radius: var(--chesspoint-border-radius);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.chesspoint-move-log-item {
+  padding: var(--chesspoint-spacing-sm) var(--chesspoint-spacing-md);
+  border-bottom: 1px solid var(--chesspoint-border);
+  transition: background-color 0.2s ease;
+}
+
+.chesspoint-move-log-item:hover {
+  background: rgba(124, 90, 240, 0.04);
+}
+
+.chesspoint-move-log-item.current {
+  background: rgba(124, 90, 240, 0.1);
+  border-left: 3px solid var(--chesspoint-primary);
+}
+
+.chesspoint-move-log-item:nth-child(even) {
+  background: rgba(124, 90, 240, 0.02);
+}
+
+/* Chesspoint Responsive Layout */
+.chesspoint-layout {
+  padding: var(--chesspoint-spacing-lg);
+  min-height: 100vh;
+  background: var(--chesspoint-background);
+}
+
+/* Chesspoint Typography */
+.chesspoint-heading {
+  font-weight: 600;
+  color: var(--chesspoint-text-strong);
+  margin-bottom: var(--chesspoint-spacing-md);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.chesspoint-text {
+  color: var(--chesspoint-text-light);
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Improved text contrast */
+.MuiTypography-root {
+  color: inherit;
+}
+
+.MuiButton-root {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.MuiChip-root {
+  font-weight: 500;
+}
+
+/* Better contrast for evaluation numbers */
+.chesspoint-eval-text {
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  color: var(--chesspoint-text-strong);
+}
+
+/* Chesspoint Loading States */
+.chesspoint-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.chesspoint-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--chesspoint-border);
+  border-top: 2px solid var(--chesspoint-primary);
+  border-radius: 50%;
+  animation: chesspoint-spin 1s linear infinite;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes chesspoint-spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Chesspoint Accessibility */
+.chesspoint-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Chesspoint High Contrast Mode */
+@media (prefers-contrast: high) {
+  :root {
+    --chesspoint-border: rgba(124, 90, 240, 0.5);
+    --chesspoint-border-strong: rgba(124, 90, 240, 0.8);
+  }
+}
+
+/* Chesspoint Print Styles */
+@media print {
+  .chesspoint-panel,
+  .chesspoint-card {
+    background: white !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+}

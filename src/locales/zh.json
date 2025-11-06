@@ -1,0 +1,13 @@
+{
+  "common": {
+    "home": "主页",
+    "about": "关于",
+    "contact": "联系",
+    "database": "数据库",
+    "analysis": "分析",
+    "settings": "设置"
+  },
+  "nav": {
+    "language": "语言"
+  }
+}

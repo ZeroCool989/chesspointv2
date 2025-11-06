@@ -1,0 +1,13 @@
+{
+  "common": {
+    "home": "Главная",
+    "about": "О нас",
+    "contact": "Контакт",
+    "database": "База данных",
+    "analysis": "Анализ",
+    "settings": "Настройки"
+  },
+  "nav": {
+    "language": "Язык"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "common": {
+    "home": "الرئيسية",
+    "about": "حول",
+    "contact": "اتصل",
+    "database": "قاعدة البيانات",
+    "analysis": "تحليل",
+    "settings": "الإعدادات"
+  },
+  "nav": {
+    "language": "اللغة"
+  }
+}

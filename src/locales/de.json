@@ -1,0 +1,13 @@
+{
+  "common": {
+    "home": "Startseite",
+    "about": "Über",
+    "contact": "Kontakt",
+    "database": "Datenbank",
+    "analysis": "Analyse",
+    "settings": "Einstellungen"
+  },
+  "nav": {
+    "language": "Sprache"
+  }
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Signup Form</title>
+</head>
+<body>
+    <h1>Test Signup Form</h1>
+    <form id="signupForm">
+        <div>
+            <label>Username:</label>
+            <input type="text" id="username" required>
+        </div>
+        <div>
+            <label>Email:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type="password" id="password" required>
+        </div>
+        <button type="submit">Sign Up</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            console.log('Submitting:', { username, email, password });
+            
+            try {
+                const response = await fetch('http://localhost:4001/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password, username })
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Success:', data);
+                    document.getElementById('result').innerHTML = `
+                        <h3 style="color: green;">✅ SUCCESS!</h3>
+                        <p>User ID: ${data.user.id}</p>
+                        <p>Email: ${data.user.email}</p>
+                        <p>Username: ${data.user.username}</p>
+                    `;
+                } else {
+                    const error = await response.text();
+                    console.error('Error:', error);
+                    document.getElementById('result').innerHTML = `
+                        <h3 style="color: red;">❌ ERROR</h3>
+                        <p>Status: ${response.status}</p>
+                        <p>Error: ${error}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                document.getElementById('result').innerHTML = `
+                    <h3 style="color: red;">❌ NETWORK ERROR</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

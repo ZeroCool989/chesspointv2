@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rg:*)",
+      "Bash(npm install)",
+      "WebFetch(domain:cdn.pixabay.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
