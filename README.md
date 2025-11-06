@@ -16,6 +16,7 @@ A modern, free chess game analysis tool powered by Stockfish engine. Analyze you
 - **User Authentication**: Secure login and registration system
 - **Music Player**: Background music player with equalizer visualization
 - **Database**: Store and review your games in browser database
+- **Puzzle Mode**: Interactive chess puzzles with automatic opponent moves, hints, difficulty filtering, and solution playback
 
 ## 🎯 Quick Start
 
@@ -38,6 +39,15 @@ A modern, free chess game analysis tool powered by Stockfish engine. Analyze you
    - Play against Stockfish at any ELO level
    - Adjust engine strength and time controls
    - Review your games after playing
+
+5. **Puzzles**:
+   - Access puzzle mode from the navigation menu
+   - Solve tactical puzzles with automatic opponent responses
+   - Use hints to get piece or move suggestions
+   - Filter puzzles by difficulty (Easy, Medium, Hard, Expert, Extreme)
+   - Filter by theme (tactics, endgame, opening, etc.)
+   - View solution playback to learn from puzzles
+   - Track your progress with mistake counting and timing
 
 ## 🛠️ Technology Stack
 
@@ -63,6 +73,13 @@ A modern, free chess game analysis tool powered by Stockfish engine. Analyze you
 ### Chess Engine
 - **Stockfish.js**: WebAssembly ports of Stockfish engine
 - **Versions**: Stockfish 11, 16, 16.1, 17 (with lite variants)
+
+### Puzzle System
+- **Puzzle Database**: MongoDB collection with Lichess puzzle format
+- **Backend API**: Express.js routes for random puzzle fetching with filters
+- **Frontend Logic**: React hooks for puzzle validation and auto-play
+- **Move Validation**: UCI format move matching against solution sequences
+- **Prefetching**: React Query prefetching for instant next puzzle loading
 
 ## 📦 Installation
 
@@ -299,7 +316,7 @@ Chesskit is licensed under AGPL-3.0 and is available at [https://github.com/Guil
 
 ## 📝 Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to contribute to this project.
+We welcome contributions! Please feel free to submit issues and pull requests to help improve Chesspoint.io.
 
 ---
 

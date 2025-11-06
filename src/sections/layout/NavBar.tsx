@@ -65,6 +65,7 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
     { label: 'Home', icon: 'mdi:home', href: '/' },
     { label: 'Analysis', icon: 'mdi:magnify', href: '/analysis' },
     { label: 'Play', icon: 'mdi:play', href: '/play' },
+    { label: 'Puzzles', icon: 'mdi:puzzle', href: '/puzzles' },
     { label: 'Database', icon: 'mdi:database', href: '/database' },
     { label: 'Lessons', icon: 'mdi:school', href: '/lessons' },
     { label: 'Blog', icon: 'mdi:blog', href: '/blog' },
@@ -245,6 +246,36 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
                     }}
                   >
                     Play
+                  </Typography>
+                </Box>
+              </NavLink>
+
+              {/* Puzzles */}
+              <NavLink href="/puzzles">
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    backgroundColor: darkMode ? 'rgba(200, 180, 255, 0.15)' : 'rgba(200, 180, 255, 0.25)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: darkMode ? '0 2px 8px rgba(200, 180, 255, 0.2)' : '0 2px 8px rgba(200, 180, 255, 0.3)'
+                  }
+                }}>
+                  <Icon icon="mdi:puzzle" style={{ fontSize: '16px', color: '#7B5AF0' }} />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: darkMode ? 'white' : '#1B1B1F',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                    }}
+                  >
+                    Puzzles
                   </Typography>
                 </Box>
               </NavLink>

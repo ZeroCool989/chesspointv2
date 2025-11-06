@@ -6,25 +6,27 @@ import "@/styles/globals.css";
 import { AppProps } from "next/app";
 import Layout from "@/sections/layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import MusicPlayer from "@/components/MusicPlayer";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/theme/ThemeProvider";
+import { Provider as JotaiProvider } from "jotai";
 import "@/lib/i18n";
-import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
 export default function MyApp({ Component, pageProps }: AppProps) {
-  // Suppress harmless HMR development warnings (temporarily disabled to debug)
-  // Re-enable after fixing rendering issue
-  // useEffect(() => {
-  //   // ... console filter code ...
-  // }, []);
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </AuthProvider>
-    </QueryClientProvider>
+    <JotaiProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <AuthProvider>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+            <MusicPlayer />
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </JotaiProvider>
   );
 }

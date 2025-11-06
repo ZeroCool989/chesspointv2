@@ -156,15 +156,34 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
           <Grid
             container
             justifyContent="center"
+            alignItems="center"
             size={{ xs: 12, sm: 8, md: 9 }}
+            gap={2}
+            sx={{ display: 'flex', flexDirection: 'row' }}
           >
-            <Slider
-              label="Board hue"
-              value={boardHue}
-              setValue={setBoardHue}
-              min={0}
-              max={360}
-            />
+            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+              <Slider
+                label="Board hue"
+                value={boardHue}
+                setValue={setBoardHue}
+                min={0}
+                max={360}
+              />
+            </Box>
+            <Box sx={{ flexShrink: 0, ml: 2 }}>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => setBoardHue(0)}
+                disabled={boardHue === 0}
+                sx={{
+                  minWidth: 80,
+                  textTransform: 'none',
+                }}
+              >
+                Default
+              </Button>
+            </Box>
           </Grid>
 
           <Grid

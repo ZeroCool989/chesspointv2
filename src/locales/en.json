@@ -9,5 +9,23 @@
   },
   "nav": {
     "language": "Language"
+  },
+  "puzzles": {
+    "title": "Puzzle Mode",
+    "puzzleId": "Puzzle ID",
+    "rating": "Rating",
+    "mistakes": "Mistakes",
+    "time": "Time",
+    "solved": "Puzzle Solved!",
+    "solvedDetails": "Great job! You completed the puzzle.",
+    "hint": "Hint",
+    "tryAgain": "Try Again",
+    "next": "Next Puzzle",
+    "filters": "Filters",
+    "ratingRange": "Rating Range",
+    "theme": "Theme",
+    "any": "Any",
+    "loading": "Loading puzzle...",
+    "noPuzzle": "No puzzle found"
   }
 }

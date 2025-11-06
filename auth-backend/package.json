@@ -9,6 +9,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "npx tsx src/scripts/seed.ts",
+    "seed:puzzles": "npx tsx src/scripts/seedPuzzles.ts",
+    "test:puzzles": "npx tsx src/scripts/testPuzzles.ts",
     "sync-indexes": "npx tsx src/scripts/syncIndexes.ts",
     "setup-db": "npx tsx src/scripts/setupDatabase.ts"
   },

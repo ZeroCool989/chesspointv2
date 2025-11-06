@@ -8,18 +8,24 @@ import Layout from "@/sections/layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import MusicPlayer from "@/components/MusicPlayer";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/theme/ThemeProvider";
+import { Provider as JotaiProvider } from "jotai";
 
 const queryClient = new QueryClient();
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-        <MusicPlayer />
-      </AuthProvider>
-    </QueryClientProvider>
+    <JotaiProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <AuthProvider>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+            <MusicPlayer />
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </JotaiProvider>
   );
 }

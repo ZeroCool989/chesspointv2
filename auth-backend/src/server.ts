@@ -9,6 +9,7 @@ import { requestLogger, errorLogger } from './middleware/logger';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
 import musicRoutes from './routes/music';
+import puzzlesRoutes from './routes/puzzles';
 
 // Load environment variables
 dotenv.config();
@@ -30,7 +31,7 @@ for (const envVar of requiredEnvVars) {
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4001;
 
 /**
  * Security middleware
@@ -96,6 +97,7 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/auth', authRateLimiter, authRoutes); // Auth routes with rate limiting
 app.use('/', userRoutes); // User routes (includes /me)
 app.use('/music', musicRoutes); // Music proxy routes (bypasses CORS)
+app.use('/api/puzzles', puzzlesRoutes); // Puzzle routes (public access)
 
 /**
  * 404 handler
@@ -143,6 +145,10 @@ const startServer = async () => {
       console.log('  POST /auth/logout');
       console.log('  GET  /me (protected)');
       console.log('  GET  /music/:fileId (Google Drive proxy)');
+      console.log('  GET  /api/puzzles/random');
+      console.log('  GET  /api/puzzles/themes');
+      console.log('  GET  /api/puzzles/:id');
+      console.log('  POST /api/puzzles/:id/attempt');
     })
     .on('error', (err: any) => {
       if (err.code === 'EADDRINUSE') {
