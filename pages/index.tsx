@@ -6,6 +6,7 @@ import MusicPlayer from "@/components/MusicPlayer";
 import MascotNavigation from "@/components/mascot/MascotNavigation";
 import MascotNavigationButton from "@/components/mascot/MascotNavigationButton";
 import { preloadMascotModels } from "@/utils/modelPreloader";
+import UniverseChessBackground from "@/components/background/UniverseChessBackground";
 
 // Dynamically import EloMascot with SSR disabled using string path
 // This prevents webpack from statically analyzing the import during build
@@ -125,8 +126,10 @@ export default function HomePage() {
 
   try {
     return (
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <PageTitle title="Chesspoint.io - Home" />
+      <>
+        <UniverseChessBackground />
+        <Container maxWidth="lg" sx={{ py: 8, position: 'relative', zIndex: 1 }}>
+          <PageTitle title="Chesspoint.io - Home" />
 
         <Grid container spacing={4} alignItems="center" justifyContent="center" minHeight="60vh">
           {/* Mascot Section - Centered */}
@@ -177,7 +180,8 @@ export default function HomePage() {
             </Box>
           </Grid>
         </Grid>
-      </Container>
+        </Container>
+      </>
     );
   } catch (error) {
     console.error('[home] error', error);

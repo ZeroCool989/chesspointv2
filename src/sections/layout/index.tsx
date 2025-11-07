@@ -28,7 +28,7 @@ export default function Layout({ children }: PropsWithChildren) {
           margin: "2vh 1vw", 
           paddingTop: "64px",
           minHeight: "calc(100vh - 64px)",
-          background: effectiveDarkMode ? '#0F0F0F' : '#FAFAFA',
+          background: 'transparent',
           color: effectiveDarkMode ? '#FFFFFF' : '#1B1B1F'
         }}>
           {children}
