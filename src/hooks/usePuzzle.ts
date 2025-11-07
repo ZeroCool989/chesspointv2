@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef, startTransition } from 'react';
 import { Chess } from 'chess.js';
 import { Square } from 'react-chessboard/dist/chessboard/types';
 
@@ -70,7 +70,7 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
     gameRef.current = game;
   }, [game]);
 
-  // Initialize puzzle when it changes
+  // Initialize puzzle when it changes - optimized for instant loading
   useEffect(() => {
     if (!puzzle) {
       setMateInX(null);
@@ -82,6 +82,7 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
     // Reset solution playback flag when puzzle changes
     isPlayingSolutionRef.current = false;
 
+    // Initialize game state synchronously (fast, no delays)
     const newGame = new Chess(puzzle.fen);
     const moves = puzzle.moves.split(' ').filter((m) => m.trim() !== '');
     const solutionMoves = moves.slice(1); // Skip first move (opponent's setup)
@@ -103,53 +104,34 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
       }
     }
 
-    // Set initial state immediately (don't wait for mate calculation)
-    setGame(newGame);
-    setSolution(solutionMoves);
+    // Calculate all derived values synchronously (fast)
+    const turnAfterFirstMove = newGame.turn();
+    const determinedMatingSide: 'white' | 'black' | null = turnAfterFirstMove === 'w' ? 'white' : 'black';
+    const calculatedMateInX: number | null = solutionMoves.length > 0 ? Math.ceil(solutionMoves.length / 2) : null;
     
-    // Determine mating side from initial position (synchronous, fast)
-    let determinedMatingSide: 'white' | 'black' | null = null;
-    if (newGame) {
-      const turnAfterFirstMove = newGame.turn();
-      // If it's white's turn after first move, player (who will mate) is white
-      // If it's black's turn after first move, player (who will mate) is black
-      determinedMatingSide = turnAfterFirstMove === 'w' ? 'white' : 'black';
-    }
-    setMatingSide(determinedMatingSide);
-    
-    // Calculate mate in X from solution length (no chess.js calculation needed!)
-    // Solution moves alternate: player (index 0), opponent (index 1), player (index 2), etc.
-    // Assuming checkmate happens at the end of the solution (typical for puzzles)
-    // Player moves are at even indices: 0, 2, 4, 6...
-    // Formula: Math.ceil(solution.length / 2) gives number of player moves
-    let calculatedMateInX: number | null = null;
-    
-    if (solutionMoves.length > 0) {
-      // Count player moves: even indices (0, 2, 4...) are player moves
-      // If solution has N moves, player moves = Math.ceil(N / 2)
-      // Examples:
-      // - 4 moves (indices 0,1,2,3): player moves at 0,2 = 2 moves = Math.ceil(4/2) = 2
-      // - 5 moves (indices 0,1,2,3,4): player moves at 0,2,4 = 3 moves = Math.ceil(5/2) = 3
-      calculatedMateInX = Math.ceil(solutionMoves.length / 2);
-    }
-    
-    // Set mateInX immediately - instant, no calculation needed!
-    setMateInX(calculatedMateInX);
-    setCurrentIndex(0);
-    setMistakes(0);
-    setStartTime(Date.now());
-    setIsComplete(false);
-    setIsSolved(false);
-    setHintSquare(null);
-    setHintType(null);
-    setHintMove(null);
-    setShakeBoard(false);
-    
-    // Update refs to match initial state
+    // Update refs immediately (synchronous, no delays)
     currentIndexRef.current = 0;
     solutionRef.current = solutionMoves;
     isCompleteRef.current = false;
     gameRef.current = newGame;
+
+    // Batch all state updates together using startTransition for better performance
+    // This ensures all updates happen in a single render cycle without blocking UI
+    startTransition(() => {
+      setGame(newGame);
+      setSolution(solutionMoves);
+      setMatingSide(determinedMatingSide);
+      setMateInX(calculatedMateInX);
+      setCurrentIndex(0);
+      setMistakes(0);
+      setStartTime(Date.now());
+      setIsComplete(false);
+      setIsSolved(false);
+      setHintSquare(null);
+      setHintType(null);
+      setHintMove(null);
+      setShakeBoard(false);
+    });
   }, [puzzle]);
 
   // Parse UCI move to chess.js move format
@@ -661,7 +643,7 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
   }, [puzzle, resetPuzzle, parseUciMove]);
 
   // Get current turn
-  const currentTurn = useMemo(() => {
+  const currentTurn = useMemo<'white' | 'black' | null>(() => {
     if (!game || isComplete) return null;
     return game.turn() === 'w' ? 'white' : 'black';
   }, [game, isComplete]);

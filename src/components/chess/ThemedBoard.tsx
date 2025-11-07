@@ -12,12 +12,20 @@ import { boardHueAtom, pieceSetAtom } from '@/components/board/states';
  * Automatically switches colors based on light/dark mode
  */
 export interface ThemedBoardProps extends Partial<ChessboardProps> {
-  // All standard Chessboard props are supported
+  // All standard Chessboard props are supported (including position, boardOrientation, etc.)
   // Additional custom props can be added here
   highlightedSquares?: Square[];
   hintType?: 'move' | 'piece' | null;
   hintMove?: { from: Square; to: Square } | null;
   brainstormArrows?: Array<[Square, Square]>;
+  // Explicitly include common Chessboard props for better TypeScript support
+  position?: string;
+  boardOrientation?: 'white' | 'black';
+  onPieceDrop?: (sourceSquare: Square, targetSquare: Square, piece: string) => boolean;
+  onSquareClick?: (square: Square) => void;
+  onSquareRightClick?: (square: Square) => void;
+  animationDuration?: number;
+  arePiecesDraggable?: boolean;
 }
 
 const PIECE_CODES = [

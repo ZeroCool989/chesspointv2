@@ -124,11 +124,9 @@ export default function PuzzlesPage() {
   // This makes "Next Puzzle" instant on subsequent clicks
   useEffect(() => {
     if (puzzle && !isLoading) {
-      // Small delay to ensure current puzzle is fully rendered before prefetching
-      // This prevents blocking the UI
-      const timeoutId = setTimeout(() => {
-        // Prefetch the next puzzle in the background
-        // Use a separate query key so it doesn't interfere with current puzzle
+      // Prefetch immediately - use requestIdleCallback if available, otherwise setTimeout
+      // This runs when the browser is idle, not blocking the UI
+      const prefetchNext = () => {
         queryClient.prefetchQuery({
           queryKey: ['puzzle', debouncedFilters, 'next'],
           queryFn: () => fetchRandomPuzzle(debouncedFilters),
@@ -136,9 +134,25 @@ export default function PuzzlesPage() {
         }).catch(() => {
           // Silently fail - prefetch is optional
         });
-      }, 100); // Small delay to not block initial render
+      };
+
+      let timeoutId: NodeJS.Timeout | number;
+      let idleCallbackId: number | undefined;
+
+      if (typeof requestIdleCallback !== 'undefined') {
+        idleCallbackId = requestIdleCallback(prefetchNext, { timeout: 2000 });
+      } else {
+        // Fallback for browsers without requestIdleCallback
+        timeoutId = setTimeout(prefetchNext, 0);
+      }
       
-      return () => clearTimeout(timeoutId);
+      return () => {
+        if (idleCallbackId !== undefined && typeof cancelIdleCallback !== 'undefined') {
+          cancelIdleCallback(idleCallbackId);
+        } else if (timeoutId !== undefined) {
+          clearTimeout(timeoutId);
+        }
+      };
     }
     return undefined;
   }, [puzzle?.id, debouncedFilters, queryClient, isLoading]); // Use puzzle.id to avoid re-prefetching on same puzzle
@@ -222,7 +236,7 @@ export default function PuzzlesPage() {
   }, [puzzleState]);
 
   // Handle next puzzle - use prefetched puzzle if available, otherwise refetch immediately
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     // Try to get the prefetched puzzle first (synchronous)
     const prefetchedPuzzle = queryClient.getQueryData<Puzzle>(['puzzle', debouncedFilters, 'next']);
     
@@ -235,8 +249,8 @@ export default function PuzzlesPage() {
       queryClient.removeQueries({ queryKey: ['puzzle', debouncedFilters, 'next'] });
       
       // Immediately prefetch the next puzzle for future use (runs in background, non-blocking)
-      // Use requestIdleCallback or setTimeout to ensure it doesn't block UI
-      setTimeout(() => {
+      // Use requestIdleCallback if available, otherwise setTimeout
+      const prefetchNext = () => {
         queryClient.prefetchQuery({
           queryKey: ['puzzle', debouncedFilters, 'next'],
           queryFn: () => fetchRandomPuzzle(debouncedFilters),
@@ -244,14 +258,20 @@ export default function PuzzlesPage() {
         }).catch(() => {
           // Silently fail - prefetch is optional
         });
-      }, 0); // Run in next tick to not block
+      };
+
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(prefetchNext, { timeout: 2000 });
+      } else {
+        setTimeout(prefetchNext, 0);
+      }
     } else {
       // No prefetched puzzle available - refetch immediately
       // Don't await - let it run and update when ready
       refetch({ cancelRefetch: false });
       
       // Prefetch the next puzzle in background (don't wait for it)
-      setTimeout(() => {
+      const prefetchNext = () => {
         queryClient.prefetchQuery({
           queryKey: ['puzzle', debouncedFilters, 'next'],
           queryFn: () => fetchRandomPuzzle(debouncedFilters),
@@ -259,9 +279,15 @@ export default function PuzzlesPage() {
         }).catch(() => {
           // Silently fail - prefetch is optional
         });
-      }, 0);
+      };
+
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(prefetchNext, { timeout: 2000 });
+      } else {
+        setTimeout(prefetchNext, 0);
+      }
     }
-  };
+  }, [queryClient, debouncedFilters, refetch]);
 
   // Handle filters change
   const handleFiltersChange = (newFilters: PuzzleFilters) => {
@@ -391,6 +417,7 @@ export default function PuzzlesPage() {
               }}
             >
               <Box key={puzzle?.id || 'puzzle-board'}>
+                {/* @ts-ignore - ThemedBoard extends ChessboardProps which includes these props */}
                 <ThemedBoard
                   position={gameFen} // Memoized FEN string
                   onPieceDrop={handlePieceDrop} // Memoized callback
@@ -423,7 +450,7 @@ export default function PuzzlesPage() {
             isSolved={puzzleState.isSolved}
             isLoading={isLoading}
             mateInX={puzzleState.mateInX}
-            currentTurn={puzzleState.currentTurn}
+            currentTurn={puzzleState.currentTurn as 'white' | 'black' | null}
             onHint={puzzleState.showHint}
             onReset={puzzleState.resetPuzzle}
             onNext={handleNext}
