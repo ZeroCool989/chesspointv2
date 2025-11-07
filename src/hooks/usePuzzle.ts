@@ -48,6 +48,10 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
   const solutionRef = useRef<string[]>([]);
   const isCompleteRef = useRef(false);
   const gameRef = useRef<Chess>(new Chess());
+  // Flag to track if solution is being played (prevents opponent moves during solution playback)
+  const isPlayingSolutionRef = useRef(false);
+  // Flag to prevent double-calling playOpponentMove
+  const isPlayingOpponentMoveRef = useRef(false);
   
   // Keep refs in sync with state
   useEffect(() => {
@@ -70,8 +74,13 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
   useEffect(() => {
     if (!puzzle) {
       setMateInX(null);
+      // Reset solution playback flag
+      isPlayingSolutionRef.current = false;
       return;
     }
+
+    // Reset solution playback flag when puzzle changes
+    isPlayingSolutionRef.current = false;
 
     const newGame = new Chess(puzzle.fen);
     const moves = puzzle.moves.split(' ').filter((m) => m.trim() !== '');
@@ -80,11 +89,18 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
     // First move is the opponent's setup move - play it automatically
     if (moves.length > 0) {
       const firstMove = moves[0];
-      newGame.move({
-        from: firstMove.slice(0, 2) as Square,
-        to: firstMove.slice(2, 4) as Square,
-        promotion: firstMove[4] as 'q' | 'r' | 'b' | 'n' | undefined,
-      });
+      try {
+        const result = newGame.move({
+          from: firstMove.slice(0, 2) as Square,
+          to: firstMove.slice(2, 4) as Square,
+          promotion: firstMove[4] as 'q' | 'r' | 'b' | 'n' | undefined,
+        });
+        if (!result) {
+          console.error('Failed to play first move in puzzle initialization');
+        }
+      } catch (error) {
+        console.error('Error playing first move in puzzle initialization:', error);
+      }
     }
 
     // Set initial state immediately (don't wait for mate calculation)
@@ -150,6 +166,12 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
 
   // Auto-play opponent move
   const playOpponentMove = useCallback(() => {
+    // Don't play if solution is being played
+    if (isPlayingSolutionRef.current) {
+      isPlayingOpponentMoveRef.current = false;
+      return;
+    }
+
     // Use refs to get latest values synchronously
     const currentIdx = currentIndexRef.current;
     const currentSolution = solutionRef.current;
@@ -168,76 +190,76 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
 
     const moveData = parseUciMove(expectedMove);
 
-    // Use shorter delay for smoother experience
-    setTimeout(() => {
-      setGame((prevGame) => {
-        // Use the ref to get the absolute latest game state
-        const latestGame = gameRef.current;
-        const latestIndex = currentIndexRef.current;
-        const latestSolution = solutionRef.current;
+    // Use requestAnimationFrame for smooth, immediate response
+    // This runs before the next paint, making it feel instant
+    requestAnimationFrame(() => {
+      // Check again if solution is being played (might have changed)
+      if (isPlayingSolutionRef.current) {
+        isPlayingOpponentMoveRef.current = false;
+        return;
+      }
 
-        // Double-check we're still at the right index
-        if (latestIndex !== currentIdx || latestIndex >= latestSolution.length) {
-          isPlayingOpponentMoveRef.current = false; // Reset flag on mismatch
-          return prevGame;
-        }
+      // Get latest state from refs (always up-to-date)
+      const latestGame = gameRef.current;
+      const latestIndex = currentIndexRef.current;
+      const latestSolution = solutionRef.current;
 
-        const newGame = new Chess(latestGame.fen());
-        let result;
-        try {
-          result = newGame.move(moveData);
-        } catch (error) {
-          console.error('Opponent move failed:', error);
-          isPlayingOpponentMoveRef.current = false; // Reset flag on error
-          return prevGame;
-        }
-        
-        if (!result) {
-          console.error('Failed to play opponent move - illegal move');
-          isPlayingOpponentMoveRef.current = false; // Reset flag on failure
-          return prevGame;
-        }
+      // Double-check we're still at the right index and solution hasn't changed
+      if (latestIndex !== currentIdx || latestIndex >= latestSolution.length || isPlayingSolutionRef.current) {
+        isPlayingOpponentMoveRef.current = false; // Reset flag on mismatch
+        return;
+      }
 
-        const nextIndex = currentIdx + 1;
-        currentIndexRef.current = nextIndex;
-        setCurrentIndex(nextIndex);
-        gameRef.current = newGame;
+      // Execute move synchronously
+      const newGame = new Chess(latestGame.fen());
+      let result;
+      try {
+        result = newGame.move(moveData);
+      } catch (error) {
+        console.error('Opponent move failed:', error);
+        isPlayingOpponentMoveRef.current = false; // Reset flag on error
+        return;
+      }
+      
+      if (!result) {
+        console.error('Failed to play opponent move - illegal move');
+        isPlayingOpponentMoveRef.current = false; // Reset flag on failure
+        return;
+      }
 
-        // Check if checkmate was achieved
-        if (newGame.isCheckmate()) {
-          isCompleteRef.current = true;
-          setIsComplete(true);
-          setIsSolved(true);
-          isPlayingOpponentMoveRef.current = false; // Reset flag
-        } else if (nextIndex >= currentSolution.length) {
-          // No more moves - puzzle complete!
-          isCompleteRef.current = true;
-          setIsComplete(true);
-          setIsSolved(true);
-          isPlayingOpponentMoveRef.current = false; // Reset flag
-        } else {
-          // Reset flag after successful move - allows next move in sequence
-          setTimeout(() => {
-            isPlayingOpponentMoveRef.current = false;
-          }, 100);
-        }
+      const nextIndex = currentIdx + 1;
+      
+      // Update refs immediately (synchronous)
+      currentIndexRef.current = nextIndex;
+      gameRef.current = newGame;
 
-        return newGame;
-      });
-    }, 250); // Delay for opponent move (visible but smooth)
+      // Check if puzzle is complete
+      const isPuzzleComplete = newGame.isCheckmate() || nextIndex >= currentSolution.length;
+      
+      if (isPuzzleComplete) {
+        isCompleteRef.current = true;
+        setIsComplete(true);
+        setIsSolved(true);
+      }
+      
+      // Batch state updates together
+      setGame(newGame);
+      setCurrentIndex(nextIndex);
+      
+      // Reset flag immediately after successful move
+      isPlayingOpponentMoveRef.current = false;
+    });
   }, [parseUciMove]);
 
   // Store playOpponentMove in a ref so useEffect can access it reliably
   const playOpponentMoveRef = useRef<(() => void) | null>(null);
-  // Flag to prevent double-calling playOpponentMove
-  const isPlayingOpponentMoveRef = useRef(false);
   
   useEffect(() => {
     playOpponentMoveRef.current = playOpponentMove;
   }, [playOpponentMove]);
 
   // Auto-play opponent moves when index changes to an odd number (opponent's turn)
-  // This ensures the sequence always works reliably
+  // Optimized for immediate response - no nested timeouts
   useEffect(() => {
     // Skip if puzzle is complete or no solution
     if (isComplete || solution.length === 0) return undefined;
@@ -246,27 +268,35 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
     const isOpponentsTurn = currentIndex % 2 === 1;
     
     if (isOpponentsTurn && currentIndex < solution.length) {
-      // Small delay to ensure state is fully updated
-      const timeoutId = setTimeout(() => {
-        // Double-check state hasn't changed
+      // Use requestAnimationFrame for smooth timing (runs before next paint)
+      const rafId = requestAnimationFrame(() => {
+        // Double-check state using refs (most up-to-date, no stale closures)
         const currentIdx = currentIndexRef.current;
         const currentSol = solutionRef.current;
         const isComplete = isCompleteRef.current;
 
         // Only play if:
         // 1. Puzzle is not complete
-        // 2. Index matches (no race condition)
+        // 2. Index matches (no race condition) - use ref value for accuracy
         // 3. Still within solution bounds
         // 4. playOpponentMove function is available
         // 5. Not already playing a move (prevent double-calls)
-        if (!isComplete && currentIdx === currentIndex && currentIdx < currentSol.length && playOpponentMoveRef.current && !isPlayingOpponentMoveRef.current) {
+        // 6. Not playing solution
+        if (!isComplete && 
+            !isPlayingSolutionRef.current &&
+            currentIdx % 2 === 1 && 
+            currentIdx < currentSol.length && 
+            playOpponentMoveRef.current && 
+            !isPlayingOpponentMoveRef.current) {
           isPlayingOpponentMoveRef.current = true;
           playOpponentMoveRef.current();
           // Note: Flag is reset inside playOpponentMove after move completes
         }
-      }, 150); // Slightly longer delay to ensure all state updates complete
+      });
 
-      return () => clearTimeout(timeoutId);
+      return () => {
+        cancelAnimationFrame(rafId);
+      };
     }
     
     return undefined;
@@ -389,79 +419,63 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
       }
 
       if (moveMatches) {
-        // Correct move! Update game state
+        // Correct move! Update game state synchronously
         try {
+          // Get latest game state from ref (always up-to-date)
+          const latestGame = gameRef.current;
+          const newGame = new Chess(latestGame.fen());
+          
+          // Use actual promotion (only if pawn is promoting)
+          const piece = latestGame.get(from);
+          const isPawn = piece && piece.type === 'p';
+          const isLastRank = (to[1] === '8' && piece?.color === 'w') || (to[1] === '1' && piece?.color === 'b');
+          const movePromotion = (isPawn && isLastRank) ? (actualPromotion || 'q') : undefined;
+          
+          // Execute move synchronously
+          let result;
+          try {
+            result = newGame.move({ from, to, promotion: movePromotion as any });
+          } catch (error) {
+            console.warn('Move execution failed: invalid move', error, { from, to, promotion: movePromotion, fen: latestGame.fen() });
+            setMistakes((prev) => prev + 1);
+            return false;
+          }
+
+          if (!result) {
+            console.warn('Move validation failed: invalid move', { from, to, promotion: movePromotion, fen: latestGame.fen() });
+            setMistakes((prev) => prev + 1);
+            return false;
+          }
+
+          // Calculate new index
           const newIndex = prevIndex + 1;
           
-          setGame((prevGame) => {
-            // Use ref to get absolute latest game state
-            const latestGame = gameRef.current;
-            const newGame = new Chess(latestGame.fen());
-            
-            // Use actual promotion (only if pawn is promoting)
-            const piece = latestGame.get(from);
-            const isPawn = piece && piece.type === 'p';
-            const isLastRank = (to[1] === '8' && piece?.color === 'w') || (to[1] === '1' && piece?.color === 'b');
-            const movePromotion = (isPawn && isLastRank) ? (actualPromotion || 'q') : undefined;
-            
-            let result;
-            try {
-              result = newGame.move({ from, to, promotion: movePromotion as any });
-            } catch (error) {
-              console.warn('Move execution failed: invalid move', error, { from, to, promotion: movePromotion, fen: latestGame.fen() });
-              return prevGame;
-            }
-
-            if (!result) {
-              console.warn('Move validation failed: invalid move', { from, to, promotion: movePromotion, fen: latestGame.fen() });
-              return prevGame;
-            }
-
-            // Update refs immediately - these are synchronous
-            currentIndexRef.current = newIndex;
-            gameRef.current = newGame;
-            setHintSquare(null);
-            setHintType(null);
-            setHintMove(null);
-
-            // Check if checkmate was achieved
-            if (newGame.isCheckmate()) {
-              isCompleteRef.current = true;
-              setIsComplete(true);
-              setIsSolved(true);
-              return newGame;
-            }
-
-            return newGame;
-          });
+          // Update refs immediately (synchronous, no delays)
+          currentIndexRef.current = newIndex;
+          gameRef.current = newGame;
           
-          // Update state - this will trigger useEffect to auto-play opponent move if needed
-          setCurrentIndex(newIndex);
-
           // Check if puzzle is complete
-          if (newIndex >= currentSolution.length) {
-            // No more moves - puzzle complete!
+          const isPuzzleComplete = newIndex >= currentSolution.length || newGame.isCheckmate();
+          
+          // Batch all state updates together using React.startTransition for better performance
+          // This ensures all updates happen in a single render cycle
+          if (isPuzzleComplete) {
             isCompleteRef.current = true;
             setIsComplete(true);
             setIsSolved(true);
-          } else {
-            // Fallback: If it's opponent's turn and flag is not set, ensure opponent move plays
-            // This handles edge cases where useEffect might not trigger
-            const isOpponentsTurn = newIndex % 2 === 1;
-            if (isOpponentsTurn && !isPlayingOpponentMoveRef.current && playOpponentMoveRef.current) {
-              // Small delay to let useEffect handle it first, but fallback if needed
-              setTimeout(() => {
-                const currentIdx = currentIndexRef.current;
-                const isComplete = isCompleteRef.current;
-                // Only trigger if still opponent's turn and not complete
-                if (!isComplete && currentIdx % 2 === 1 && currentIdx < solutionRef.current.length && !isPlayingOpponentMoveRef.current && playOpponentMoveRef.current) {
-                  isPlayingOpponentMoveRef.current = true;
-                  playOpponentMoveRef.current();
-                }
-              }, 200); // Slightly longer than useEffect delay to let it try first
-            }
           }
-          // useEffect will handle opponent moves automatically when currentIndex changes
+          
+          // Update game state and index together
+          setGame(newGame);
+          setCurrentIndex(newIndex);
+          
+          // Clear hints
+          setHintSquare(null);
+          setHintType(null);
+          setHintMove(null);
+
+          // Opponent move will be triggered automatically by useEffect when currentIndex changes
+          // No need for fallback setTimeout - useEffect handles it reliably
 
           return true;
         } catch (error) {
@@ -506,6 +520,10 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
   const resetPuzzle = useCallback(() => {
     if (!puzzle) return;
 
+    // Reset solution playback flag
+    isPlayingSolutionRef.current = false;
+    isPlayingOpponentMoveRef.current = false;
+
     const newGame = new Chess(puzzle.fen);
     const moves = puzzle.moves.split(' ').filter((m) => m.trim() !== '');
     const solutionMoves = moves.slice(1); // Skip first move (opponent's setup)
@@ -514,11 +532,14 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
     if (moves.length > 0) {
       const firstMove = moves[0];
       try {
-        newGame.move({
+        const result = newGame.move({
           from: firstMove.slice(0, 2) as Square,
           to: firstMove.slice(2, 4) as Square,
           promotion: firstMove[4] as 'q' | 'r' | 'b' | 'n' | undefined,
         });
+        if (!result) {
+          console.error('Failed to play first move in reset');
+        }
       } catch (error) {
         console.error('Error playing first move in reset:', error);
       }
@@ -562,11 +583,14 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
     if (!puzzle) return;
     
     try {
+      // Set flag to prevent opponent moves during solution playback
+      isPlayingSolutionRef.current = true;
+      
       // Reset first
       resetPuzzle();
       
-      // Wait for reset to complete
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Wait for reset to complete (reduced delay)
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       // Create a fresh game state to simulate the solution
       const solutionGame = new Chess(puzzle.fen);
@@ -576,14 +600,32 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
       if (allMoves.length > 0) {
         const firstMove = allMoves[0];
         const firstMoveData = parseUciMove(firstMove);
-        solutionGame.move(firstMoveData);
+        const result = solutionGame.move(firstMoveData);
+        if (!result) {
+          console.warn('Invalid first move in solution');
+          isPlayingSolutionRef.current = false;
+          return;
+        }
+        // Update game state immediately
+        setGame(new Chess(solutionGame.fen()));
       }
       
       // Play all solution moves
       const solutionMoves = allMoves.slice(1);
       
       for (let i = 0; i < solutionMoves.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 600)); // Delay between moves
+        // Check if solution playback was interrupted
+        if (!isPlayingSolutionRef.current) {
+          break;
+        }
+        
+        // Reduced delay for smoother playback
+        await new Promise(resolve => setTimeout(resolve, 400));
+        
+        // Check again after delay
+        if (!isPlayingSolutionRef.current) {
+          break;
+        }
         
         const move = solutionMoves[i];
         const moveData = parseUciMove(move);
@@ -598,16 +640,23 @@ export function usePuzzle(puzzle: Puzzle | null | undefined) {
         // Update the game state
         setGame(new Chess(solutionGame.fen()));
         setCurrentIndex(i + 1);
+        currentIndexRef.current = i + 1;
+        gameRef.current = new Chess(solutionGame.fen());
         
         // Check if puzzle is complete
         if (i + 1 >= solutionMoves.length || solutionGame.isCheckmate()) {
+          isCompleteRef.current = true;
           setIsComplete(true);
           setIsSolved(true);
           break;
         }
       }
+      
+      // Reset flag after solution playback completes
+      isPlayingSolutionRef.current = false;
     } catch (error) {
       console.error('Error playing solution:', error);
+      isPlayingSolutionRef.current = false;
     }
   }, [puzzle, resetPuzzle, parseUciMove]);
 

@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Box, Container, Grid2 as Grid, Typography, Alert, Card } from '@mui/material';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { Box, Container, Grid2 as Grid, Typography, Card } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ThemedBoard } from '@/components/chess/ThemedBoard';
@@ -25,15 +25,39 @@ async function fetchRandomPuzzle(filters: PuzzleFilters): Promise<Puzzle> {
   const url = `${API_BASE}/api/puzzles/random?${params}`;
   console.log('Fetching puzzle from:', url);
 
-  const response = await fetch(url);
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Failed to fetch puzzle:', response.status, errorText);
-    throw new Error(`Failed to fetch puzzle: ${response.status}`);
+  try {
+    // Create AbortController for timeout (more compatible than AbortSignal.timeout)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(url, {
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Failed to fetch puzzle:', response.status, errorText);
+      throw new Error(`Failed to fetch puzzle: ${response.status} ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('Puzzle data:', data);
+    return data;
+  } catch (error) {
+    // Handle network errors, timeouts, etc.
+    if (error instanceof Error) {
+      if (error.name === 'AbortError' || error.message.includes('timeout')) {
+        throw new Error('Request timeout - please check your internet connection');
+      }
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        throw new Error('Network error - please check your internet connection and ensure the backend is running');
+      }
+      throw error;
+    }
+    throw new Error('Unknown error occurred while fetching puzzle');
   }
-  const data = await response.json();
-  console.log('Puzzle data:', data);
-  return data;
 }
 
 async function fetchThemes(): Promise<string[]> {
@@ -91,7 +115,9 @@ export default function PuzzlesPage() {
     queryKey: ['puzzle', debouncedFilters],
     queryFn: () => fetchRandomPuzzle(debouncedFilters),
     staleTime: 0, // Always fetch fresh
-    retry: 1,
+    retry: 3, // Retry up to 3 times for network issues
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s, 3s
+    refetchOnWindowFocus: false, // Don't refetch on window focus to avoid interruptions
   });
 
   // Prefetch next puzzle - runs automatically when current puzzle loads
@@ -114,6 +140,7 @@ export default function PuzzlesPage() {
       
       return () => clearTimeout(timeoutId);
     }
+    return undefined;
   }, [puzzle?.id, debouncedFilters, queryClient, isLoading]); // Use puzzle.id to avoid re-prefetching on same puzzle
 
   // Use puzzle hook for game logic
@@ -123,7 +150,6 @@ export default function PuzzlesPage() {
   useEffect(() => {
     setBrainstormSquares([]);
     setBrainstormArrows([]);
-    setRightClickDown(null);
   }, [puzzle?.id]);
 
   // Timer effect
@@ -155,14 +181,45 @@ export default function PuzzlesPage() {
     }
   }, [puzzleState.isComplete, puzzleState.isSolved, puzzleState.elapsedTime, puzzleState.movesTried, puzzleState.mistakes, puzzle]);
 
-  // Handle move drop
-  const handlePieceDrop = (sourceSquare: Square, targetSquare: Square, piece: string) => {
-    // piece format is like "wP" (white pawn), "bK" (black king), etc.
-    // piece[0] is color (w/b), piece[1] is piece type (P, R, N, B, Q, K)
-    // We don't get promotion from the piece string - it should be handled by the board
-    // For now, pass undefined and let validateMove determine if promotion is needed
-    return puzzleState.validateMove(sourceSquare, targetSquare, undefined);
-  };
+  // Memoize FEN string to prevent board remounts
+  const gameFen = useMemo(() => {
+    return puzzleState.game.fen();
+  }, [puzzleState.game]);
+
+  // Track pending moves to prevent double-clicks and race conditions
+  const pendingMoveRef = useRef<{ from: Square; to: Square } | null>(null);
+  const isProcessingMoveRef = useRef(false);
+
+  // Handle move drop with debouncing and optimistic updates
+  const handlePieceDrop = useCallback((sourceSquare: Square, targetSquare: Square, _piece: string) => {
+    // Prevent double-clicks and rapid moves
+    if (isProcessingMoveRef.current) {
+      return false;
+    }
+
+    // Check if this is a duplicate of a pending move
+    if (pendingMoveRef.current && 
+        pendingMoveRef.current.from === sourceSquare && 
+        pendingMoveRef.current.to === targetSquare) {
+      return false;
+    }
+
+    // Set pending move immediately for optimistic UI
+    pendingMoveRef.current = { from: sourceSquare, to: targetSquare };
+    isProcessingMoveRef.current = true;
+
+    // Validate move synchronously using refs (fast, no async delays)
+    const isValid = puzzleState.validateMove(sourceSquare, targetSquare, undefined);
+
+    // Clear pending move after validation
+    // Use setTimeout to allow state updates to complete
+    setTimeout(() => {
+      pendingMoveRef.current = null;
+      isProcessingMoveRef.current = false;
+    }, 0);
+
+    return isValid;
+  }, [puzzleState]);
 
   // Handle next puzzle - use prefetched puzzle if available, otherwise refetch immediately
   const handleNext = () => {
@@ -215,7 +272,6 @@ export default function PuzzlesPage() {
   const [brainstormSquares, setBrainstormSquares] = useState<Square[]>([]);
   // Brainstorming arrows - arrows drawn by user for brainstorming
   const [brainstormArrows, setBrainstormArrows] = useState<Array<[Square, Square]>>([]);
-  const [rightClickDown, setRightClickDown] = useState<Square | null>(null);
 
   // Handle square click for brainstorming
   const handleSquareClick = useCallback((square: Square) => {
@@ -231,11 +287,10 @@ export default function PuzzlesPage() {
   }, []);
 
   // Handle square right-click to clear everything (single click)
-  const handleSquareRightClick = useCallback((square: Square) => {
+  const handleSquareRightClick = useCallback((_square: Square) => {
     // Single right-click - clear all brainstorming highlights and arrows
     setBrainstormSquares([]);
     setBrainstormArrows([]);
-    setRightClickDown(null);
     // Clear hint arrows by clearing hint state
     puzzleState.clearHints();
   }, [puzzleState]);
@@ -268,7 +323,7 @@ export default function PuzzlesPage() {
 
   // Determine board orientation based on mating side
   // Board should always be from the perspective of the pieces that are mating
-  const boardOrientation = useMemo(() => {
+  const boardOrientation = useMemo<'white' | 'black'>(() => {
     if (!puzzleState.matingSide) return 'white';
     return puzzleState.matingSide === 'black' ? 'black' : 'white';
   }, [puzzleState.matingSide]);
@@ -335,20 +390,21 @@ export default function PuzzlesPage() {
                 touchAction: 'none', // Prevent default touch behaviors for better drag support
               }}
             >
-              <ThemedBoard
-                id="puzzle-board"
-                position={puzzleState.game.fen()}
-                onPieceDrop={handlePieceDrop}
-                boardOrientation={boardOrientation}
-                highlightedSquares={highlightedSquares}
-                hintType={puzzleState.hintType}
-                hintMove={puzzleState.hintMove}
-                brainstormArrows={brainstormArrows}
-                animationDuration={200}
-                arePiecesDraggable={!puzzleState.isComplete}
-                onSquareClick={handleSquareClick}
-                onSquareRightClick={handleSquareRightClick}
-              />
+              <Box key={puzzle?.id || 'puzzle-board'}>
+                <ThemedBoard
+                  position={gameFen} // Memoized FEN string
+                  onPieceDrop={handlePieceDrop} // Memoized callback
+                  boardOrientation={boardOrientation} // Memoized
+                  highlightedSquares={highlightedSquares} // Memoized
+                  hintType={puzzleState.hintType}
+                  hintMove={puzzleState.hintMove}
+                  brainstormArrows={brainstormArrows}
+                  animationDuration={200}
+                  arePiecesDraggable={!puzzleState.isComplete}
+                  onSquareClick={handleSquareClick} // Already memoized
+                  onSquareRightClick={handleSquareRightClick} // Already memoized
+                />
+              </Box>
             </Box>
           </Box>
         </Grid>
