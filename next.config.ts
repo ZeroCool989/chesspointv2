@@ -6,6 +6,10 @@ const nextConfig = (phase: string): NextConfig => ({
   output: phase === PHASE_PRODUCTION_BUILD ? "export" : undefined,
   trailingSlash: false,
   reactStrictMode: true,
+  // Disable turbo for better compatibility with Three.js packages
+  turbo: undefined,
+  // Transpile React Three Fiber packages
+  transpilePackages: ['@react-three/fiber', '@react-three/drei', 'three'],
   // Disable ISR dev indicators to fix HMR "isrManifest" errors in Pages Router
   devIndicators: {
     appIsrStatus: false,
@@ -24,11 +28,41 @@ const nextConfig = (phase: string): NextConfig => ({
     pagesBufferLength: 2,
   },
   // Exclude auth-backend from Next.js build
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.watchOptions = {
       ...config.watchOptions,
       ignored: ['**/auth-backend/**'],
     };
+    
+    // Ensure Three.js and React Three Fiber work correctly
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: false,
+      };
+    }
+    
+    // Ensure proper module resolution for React Three Fiber packages
+    // Don't set explicit aliases - let webpack resolve normally from node_modules
+    // The transpilePackages option above handles transpilation
+    const path = require('path');
+    
+    // Ensure node_modules is in the resolve path (should be default, but being explicit)
+    if (!config.resolve.modules) {
+      config.resolve.modules = ['node_modules', path.resolve(__dirname, 'node_modules')];
+    } else if (Array.isArray(config.resolve.modules)) {
+      // Ensure node_modules is included
+      const nodeModulesPath = path.resolve(__dirname, 'node_modules');
+      if (!config.resolve.modules.includes('node_modules')) {
+        config.resolve.modules.unshift('node_modules');
+      }
+      if (!config.resolve.modules.includes(nodeModulesPath)) {
+        config.resolve.modules.push(nodeModulesPath);
+      }
+    }
+    
     return config;
   },
   images: {

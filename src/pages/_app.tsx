@@ -6,7 +6,6 @@ import "@/styles/globals.css";
 import { AppProps } from "next/app";
 import Layout from "@/sections/layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import MusicPlayer from "@/components/MusicPlayer";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/theme/ThemeProvider";
 import { Provider as JotaiProvider } from "jotai";
@@ -22,7 +21,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
             <Layout>
               <Component {...pageProps} />
             </Layout>
-            <MusicPlayer />
+            {/* MusicPlayer is rendered in Layout component */}
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>

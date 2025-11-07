@@ -94,10 +94,10 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
         enableColorOnDark
       >
         <Toolbar 
-          variant="dense"
           sx={{
-            minHeight: { xs: '56px', sm: '64px' },
-            py: 1,
+            minHeight: { xs: '64px', sm: '72px' },
+            py: { xs: 1, sm: 1.5 },
+            px: { xs: 1, sm: 2 },
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -145,48 +145,41 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
           <Box sx={{ 
             display: { xs: 'none', lg: 'flex' },
             alignItems: 'center', 
-            gap: 2,
+            gap: 1.5,
             ml: 3, 
             flex: 1,
+            overflow: 'hidden',
           }}>
             {/* Main Navigation */}
             <Box sx={{ 
               display: 'flex', 
               alignItems: 'center', 
-              gap: 2,
-              padding: '6px 12px',
+              gap: 1,
+              padding: '8px 16px',
               borderRadius: '12px',
               backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(124, 90, 240, 0.05)',
               border: darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(124, 90, 240, 0.1)',
-              backdropFilter: 'blur(10px)'
+              backdropFilter: 'blur(10px)',
+              flexWrap: 'nowrap',
             }}>
               {/* Home */}
               <NavLink href="/">
                 <Box sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1,
-                  padding: '6px 12px',
+                  gap: 0.75,
+                  padding: '6px 10px',
                   borderRadius: '8px',
                   transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
                   '&:hover': {
                     backgroundColor: darkMode ? 'rgba(200, 180, 255, 0.15)' : 'rgba(200, 180, 255, 0.25)',
                     transform: 'translateY(-1px)',
                     boxShadow: darkMode ? '0 2px 8px rgba(200, 180, 255, 0.2)' : '0 2px 8px rgba(200, 180, 255, 0.3)'
                   }
                 }}>
-                  <Icon icon="mdi:home" style={{ fontSize: '16px', color: '#7B5AF0' }} />
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: darkMode ? 'white' : '#1B1B1F',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                    }}
-                  >
-                    Home
-                  </Typography>
+                  <Icon icon="mdi:home" style={{ fontSize: '18px', color: '#7B5AF0' }} />
+                  <Typography variant="body2" sx={{ color: darkMode ? 'white' : '#1B1B1F', fontWeight: 600, cursor: 'pointer', fontSize: '0.875rem' }}>Home</Typography>
                 </Box>
               </NavLink>
 
@@ -195,28 +188,19 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
                 <Box sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1,
-                  padding: '6px 12px',
+                  gap: 0.75,
+                  padding: '6px 10px',
                   borderRadius: '8px',
                   transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
                   '&:hover': {
                     backgroundColor: darkMode ? 'rgba(200, 180, 255, 0.15)' : 'rgba(200, 180, 255, 0.25)',
                     transform: 'translateY(-1px)',
                     boxShadow: darkMode ? '0 2px 8px rgba(200, 180, 255, 0.2)' : '0 2px 8px rgba(200, 180, 255, 0.3)'
                   }
                 }}>
-                  <Icon icon="mdi:magnify" style={{ fontSize: '16px', color: '#7B5AF0' }} />
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: darkMode ? 'white' : '#1B1B1F',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                    }}
-                  >
-                    Analysis
-                  </Typography>
+                  <Icon icon="mdi:magnify" style={{ fontSize: '18px', color: '#7B5AF0' }} />
+                  <Typography variant="body2" sx={{ color: darkMode ? 'white' : '#1B1B1F', fontWeight: 600, cursor: 'pointer', fontSize: '0.875rem' }}>Analysis</Typography>
                 </Box>
               </NavLink>
 
@@ -225,28 +209,19 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
                 <Box sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1,
-                  padding: '6px 12px',
+                  gap: 0.75,
+                  padding: '6px 10px',
                   borderRadius: '8px',
                   transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
                   '&:hover': {
                     backgroundColor: darkMode ? 'rgba(200, 180, 255, 0.15)' : 'rgba(200, 180, 255, 0.25)',
                     transform: 'translateY(-1px)',
                     boxShadow: darkMode ? '0 2px 8px rgba(200, 180, 255, 0.2)' : '0 2px 8px rgba(200, 180, 255, 0.3)'
                   }
                 }}>
-                  <Icon icon="mdi:play" style={{ fontSize: '16px', color: '#7B5AF0' }} />
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: darkMode ? 'white' : '#1B1B1F',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                    }}
-                  >
-                    Play
-                  </Typography>
+                  <Icon icon="mdi:play" style={{ fontSize: '18px', color: '#7B5AF0' }} />
+                  <Typography variant="body2" sx={{ color: darkMode ? 'white' : '#1B1B1F', fontWeight: 600, cursor: 'pointer', fontSize: '0.875rem' }}>Play</Typography>
                 </Box>
               </NavLink>
 
@@ -255,28 +230,19 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
                 <Box sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1,
-                  padding: '6px 12px',
+                  gap: 0.75,
+                  padding: '6px 10px',
                   borderRadius: '8px',
                   transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
                   '&:hover': {
                     backgroundColor: darkMode ? 'rgba(200, 180, 255, 0.15)' : 'rgba(200, 180, 255, 0.25)',
                     transform: 'translateY(-1px)',
                     boxShadow: darkMode ? '0 2px 8px rgba(200, 180, 255, 0.2)' : '0 2px 8px rgba(200, 180, 255, 0.3)'
                   }
                 }}>
-                  <Icon icon="mdi:puzzle" style={{ fontSize: '16px', color: '#7B5AF0' }} />
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: darkMode ? 'white' : '#1B1B1F',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                    }}
-                  >
-                    Puzzles
-                  </Typography>
+                  <Icon icon="mdi:puzzle" style={{ fontSize: '18px', color: '#7B5AF0' }} />
+                  <Typography variant="body2" sx={{ color: darkMode ? 'white' : '#1B1B1F', fontWeight: 600, cursor: 'pointer', fontSize: '0.875rem' }}>Puzzles</Typography>
                 </Box>
               </NavLink>
 
@@ -285,28 +251,19 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
                 <Box sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1,
-                  padding: '6px 12px',
+                  gap: 0.75,
+                  padding: '6px 10px',
                   borderRadius: '8px',
                   transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
                   '&:hover': {
                     backgroundColor: darkMode ? 'rgba(200, 180, 255, 0.15)' : 'rgba(200, 180, 255, 0.25)',
                     transform: 'translateY(-1px)',
                     boxShadow: darkMode ? '0 2px 8px rgba(200, 180, 255, 0.2)' : '0 2px 8px rgba(200, 180, 255, 0.3)'
                   }
                 }}>
-                  <Icon icon="mdi:database" style={{ fontSize: '16px', color: '#7B5AF0' }} />
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: darkMode ? 'white' : '#1B1B1F',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                    }}
-                  >
-                    Database
-                  </Typography>
+                  <Icon icon="mdi:database" style={{ fontSize: '18px', color: '#7B5AF0' }} />
+                  <Typography variant="body2" sx={{ color: darkMode ? 'white' : '#1B1B1F', fontWeight: 600, cursor: 'pointer', fontSize: '0.875rem' }}>Database</Typography>
                 </Box>
               </NavLink>
 
@@ -316,121 +273,22 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
                   <Box sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1,
-                    padding: '6px 12px',
+                    gap: 0.75,
+                    padding: '6px 10px',
                     borderRadius: '8px',
                     transition: 'all 0.2s ease',
+                    whiteSpace: 'nowrap',
                     '&:hover': {
                       backgroundColor: darkMode ? 'rgba(200, 180, 255, 0.15)' : 'rgba(200, 180, 255, 0.25)',
                       transform: 'translateY(-1px)',
                       boxShadow: darkMode ? '0 2px 8px rgba(200, 180, 255, 0.2)' : '0 2px 8px rgba(200, 180, 255, 0.3)'
                     }
                   }}>
-                    <Icon icon="mdi:school" style={{ fontSize: '16px', color: '#7B5AF0' }} />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: darkMode ? 'white' : '#1B1B1F',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                      }}
-                    >
-                      Lessons
-                    </Typography>
+                    <Icon icon="mdi:school" style={{ fontSize: '18px', color: '#7B5AF0' }} />
+                    <Typography variant="body2" sx={{ color: darkMode ? 'white' : '#1B1B1F', fontWeight: 600, cursor: 'pointer', fontSize: '0.875rem' }}>Lessons</Typography>
                   </Box>
                 </NavLink>
               )}
-
-              {/* Blog */}
-              <NavLink href="/blog">
-                <Box sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  padding: '6px 12px',
-                  borderRadius: '8px',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    backgroundColor: darkMode ? 'rgba(200, 180, 255, 0.15)' : 'rgba(200, 180, 255, 0.25)',
-                    transform: 'translateY(-1px)',
-                    boxShadow: darkMode ? '0 2px 8px rgba(200, 180, 255, 0.2)' : '0 2px 8px rgba(200, 180, 255, 0.3)'
-                  }
-                }}>
-                  <Icon icon="mdi:blog" style={{ fontSize: '16px', color: '#7B5AF0' }} />
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: darkMode ? 'white' : '#1B1B1F',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                    }}
-                  >
-                    Blog
-                  </Typography>
-                </Box>
-              </NavLink>
-
-              {/* About */}
-              <NavLink href="/about">
-                <Box sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  padding: '6px 12px',
-                  borderRadius: '8px',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    backgroundColor: darkMode ? 'rgba(200, 180, 255, 0.15)' : 'rgba(200, 180, 255, 0.25)',
-                    transform: 'translateY(-1px)',
-                    boxShadow: darkMode ? '0 2px 8px rgba(200, 180, 255, 0.2)' : '0 2px 8px rgba(200, 180, 255, 0.3)'
-                  }
-                }}>
-                  <Icon icon="mdi:information" style={{ fontSize: '16px', color: '#7B5AF0' }} />
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: darkMode ? 'white' : '#1B1B1F',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                    }}
-                  >
-                    About
-                  </Typography>
-                </Box>
-              </NavLink>
-
-              {/* Feedback */}
-              <NavLink href="/feedback">
-                <Box sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  padding: '6px 12px',
-                  borderRadius: '8px',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    backgroundColor: darkMode ? 'rgba(200, 180, 255, 0.15)' : 'rgba(200, 180, 255, 0.25)',
-                    transform: 'translateY(-1px)',
-                    boxShadow: darkMode ? '0 2px 8px rgba(200, 180, 255, 0.2)' : '0 2px 8px rgba(200, 180, 255, 0.3)'
-                  }
-                }}>
-                  <Icon icon="mdi:message-reply-text" style={{ fontSize: '16px', color: '#7B5AF0' }} />
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: darkMode ? 'white' : '#1B1B1F',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                    }}
-                  >
-                    Feedback
-                  </Typography>
-                </Box>
-              </NavLink>
 
               {/* Donate */}
               <NavLink href="/donate">
@@ -459,10 +317,11 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: 1,
+            gap: 1.5,
             ml: 'auto',
             flexWrap: 'nowrap',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            minWidth: 'fit-content',
           }}>
             {/* Mobile Hamburger Menu */}
             <IconButton
@@ -584,6 +443,17 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
             <IconButton
               onClick={switchDarkMode}
               edge="end"
+              sx={{
+                ml: 1,
+                padding: '8px',
+                backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(124, 90, 240, 0.05)',
+                border: darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(124, 90, 240, 0.1)',
+                '&:hover': {
+                  backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(124, 90, 240, 0.1)',
+                  transform: 'scale(1.05)',
+                },
+                transition: 'all 0.2s ease',
+              }}
             >
               {darkMode ? (
                 <Icon icon="mdi:brightness-7" style={{ color: '#7B5AF0', fontSize: '24px' }} />

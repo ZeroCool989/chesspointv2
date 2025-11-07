@@ -20,6 +20,7 @@ const MusicPlayer: React.FC = () => {
   const [volume, setVolume] = useState(0.5);
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [actualPlayingState, setActualPlayingState] = useState(false);
   const [hiddenTracks, setHiddenTracks] = useState<string[]>([]);
   const [tracks, setTracks] = useState<Array<{ label: string; src: string }>>([]);
   const [tracksLoading, setTracksLoading] = useState(true);
@@ -249,6 +250,11 @@ const MusicPlayer: React.FC = () => {
     audioRef.current.play().then(() => {
       console.log('🎵 Audio started successfully');
       setIsPlaying(true);
+      setActualPlayingState(true); // Explicitly update actual playing state
+      // Dispatch event to trigger Elo breakdance animation
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('elo-music-playing', { detail: { playing: true } }));
+      }
     }).catch((error) => {
       console.error('🎵 Audio play failed:', error);
       console.error('🎵 Audio element:', audioRef.current);
@@ -265,6 +271,12 @@ const MusicPlayer: React.FC = () => {
     audioRef.current.pause();
     savePlaybackPosition();
     setIsPlaying(false);
+    setActualPlayingState(false); // Explicitly update actual playing state
+    
+    // Dispatch event to stop Elo breakdance animation
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('elo-music-playing', { detail: { playing: false } }));
+    }
 
     // Cancel animation frame
     if (animationFrameRef.current) {
@@ -291,7 +303,9 @@ const MusicPlayer: React.FC = () => {
       audioRef.current.src = tracks[index].src;
       audioRef.current.currentTime = 0;
       if (isPlaying) {
-        audioRef.current.play();
+        audioRef.current.play().then(() => {
+          setActualPlayingState(true); // Update state when track changes while playing
+        });
       }
     }
   }, [currentTrackIndex, isPlaying]);
@@ -328,13 +342,20 @@ const MusicPlayer: React.FC = () => {
     if (audioRef.current && tracks[nextIndex]) {
         audioRef.current.src = tracks[nextIndex].src;
       audioRef.current.currentTime = 0;
-        audioRef.current.play();
+        audioRef.current.play().then(() => {
+          setActualPlayingState(true); // Update state when auto-advancing
+        });
       }
       return;
     }
 
     // Off mode: stop playback
       setIsPlaying(false);
+      setActualPlayingState(false); // Explicitly update actual playing state
+      // Dispatch event to stop Elo breakdance animation when track ends
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('elo-music-playing', { detail: { playing: false } }));
+      }
   }, [repeatMode, currentTrackIndex, getVisibleTracks]);
 
   /**
@@ -382,6 +403,7 @@ const MusicPlayer: React.FC = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('chesspoint:music-ui', JSON.stringify(newState));
     }
+    // Music continues playing regardless of open/closed state
   };
 
   /**
@@ -395,9 +417,12 @@ const MusicPlayer: React.FC = () => {
     
     audio.volume = volume;
 
-    const fullUrl = new URL(tracks[currentTrackIndex].src, window.location.origin).href;
-    if (audio.src !== fullUrl) {
-      audio.src = tracks[currentTrackIndex].src;
+    // Set audio source directly (already a full URL from backend)
+    const audioSrc = tracks[currentTrackIndex].src;
+    if (audio.src !== audioSrc) {
+      audio.src = audioSrc;
+      // Load the new source
+      audio.load();
     }
 
     let lastSaveTime = 0;
@@ -407,18 +432,36 @@ const MusicPlayer: React.FC = () => {
         savePlaybackPosition();
         lastSaveTime = now;
       }
+      // Sync actual playing state
+      setActualPlayingState(!audio.paused);
+    };
+
+    const handlePlay = () => {
+      setActualPlayingState(true);
+    };
+
+    const handlePause = () => {
+      setActualPlayingState(false);
     };
 
     const handleError = () => {
       console.warn('Audio playback error:', tracks[currentTrackIndex]?.src);
+      setActualPlayingState(false);
     };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleTrackEnded);
     audio.addEventListener('error', handleError);
 
+    // Initial sync
+    setActualPlayingState(!audio.paused);
+
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleTrackEnded);
       audio.removeEventListener('error', handleError);
     };
@@ -501,16 +544,23 @@ const MusicPlayer: React.FC = () => {
       <div className={`cp-player ${isOpen ? 'cp-player--open' : ''}`}>
         <audio ref={audioRef} preload="auto" crossOrigin="anonymous" />
 
-        {/* Minimized button */}
+        {/* Minimized button - shows equalizer when playing, music note when stopped */}
         {!isOpen && (
-          <button className="cp-mini" onClick={toggleOpen} aria-label="Open player" title={isPlaying ? 'Playing…' : 'Music'}>
-            {isPlaying ? (
+          <button
+            key={isPlaying ? 'playing' : 'stopped'}
+            className={`cp-mini ${isPlaying ? 'cp-mini--equalizer' : 'cp-mini--note'}`}
+            onClick={toggleOpen}
+            aria-label={isPlaying ? 'Playing…' : 'Open Music Player'}
+            title={isPlaying ? 'Playing…' : 'Music Player'}
+          >
+            {isPlaying && (
               <svg className="cp-mini__equalizer" width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <rect className="cp-mini__bar cp-mini__bar--1" x="6" y="8" width="3" height="8" rx="1.5" fill="currentColor" />
                 <rect className="cp-mini__bar cp-mini__bar--2" x="10.5" y="5" width="3" height="14" rx="1.5" fill="currentColor" />
                 <rect className="cp-mini__bar cp-mini__bar--3" x="15" y="10" width="3" height="4" rx="1.5" fill="currentColor" />
               </svg>
-            ) : (
+            )}
+            {!isPlaying && (
               <svg className="cp-mini__note" width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M9 18V5l12-2v13M9 18c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3zm12-2c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -749,6 +799,16 @@ const MusicPlayer: React.FC = () => {
           width: 24px;
           height: 24px;
         }
+        
+        /* Force hide music note when equalizer should show */
+        .cp-mini--equalizer .cp-mini__note {
+          display: none !important;
+        }
+        
+        /* Force hide equalizer when note should show */
+        .cp-mini--note .cp-mini__equalizer {
+          display: none !important;
+        }
 
         .cp-mini__bar {
           transform-origin: center bottom;
@@ -756,15 +816,15 @@ const MusicPlayer: React.FC = () => {
         }
 
         .cp-mini__bar--1 { 
-          animation: cp-eq-bounce-1 800ms ease-in-out infinite;
+          animation: cp-eq-bounce-1 600ms ease-in-out infinite;
           fill: #FF6B9D;
         }
         .cp-mini__bar--2 { 
-          animation: cp-eq-bounce-2 1000ms ease-in-out infinite 100ms;
+          animation: cp-eq-bounce-2 700ms ease-in-out infinite 100ms;
           fill: #B48EFA;
         }
         .cp-mini__bar--3 { 
-          animation: cp-eq-bounce-3 1200ms ease-in-out infinite 200ms;
+          animation: cp-eq-bounce-3 800ms ease-in-out infinite 200ms;
           fill: #7C4DFF;
         }
 
