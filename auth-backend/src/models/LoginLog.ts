@@ -24,7 +24,7 @@ const loginLogSchema = new Schema<ILoginLog>({
   },
   action: {
     type: String,
-    enum: ['login', 'register', 'logout'],
+    enum: ['login', 'register', 'logout', 'password_reset'],
     index: true,
   },
   success: {

@@ -10,6 +10,8 @@ import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/router";
@@ -39,6 +41,7 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
   const router = useRouter();
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 
   // Debug: log user state
   console.log("NavBar user state:", user);
@@ -54,11 +57,20 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
   const handleLogout = async () => {
     try {
       await logout();
+      setUserMenuAnchor(null); // Close user menu
       closeMobileMenu();
       router.push("/");
     } catch (error) {
       console.error("Failed to log out:", error);
     }
+  };
+
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchor(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null);
   };
 
   const navItems = [
@@ -347,32 +359,42 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
           {user ? (
             <>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box
+                <IconButton
+                  onClick={handleUserMenuOpen}
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #7B5AF0 0%, #A78BFA 100%)',
-                    boxShadow: '0 2px 8px rgba(123, 90, 240, 0.3)',
+                    padding: 0,
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #6D4EDB 0%, #9C7BFA 100%)',
-                      boxShadow: '0 4px 12px rgba(123, 90, 240, 0.4)',
                       transform: 'translateY(-1px)',
                     },
                     transition: 'all 0.2s ease-in-out',
                   }}
                 >
-                  <Icon 
-                    icon="mdi:account-circle" 
-                    style={{ 
-                      color: 'white', 
-                      fontSize: '28px' 
-                    }} 
-                  />
-                </Box>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #7B5AF0 0%, #A78BFA 100%)',
+                      boxShadow: '0 2px 8px rgba(123, 90, 240, 0.3)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #6D4EDB 0%, #9C7BFA 100%)',
+                        boxShadow: '0 4px 12px rgba(123, 90, 240, 0.4)',
+                      },
+                      transition: 'all 0.2s ease-in-out',
+                    }}
+                  >
+                    <Icon 
+                      icon="mdi:account-circle" 
+                      style={{ 
+                        color: 'white', 
+                        fontSize: '28px' 
+                      }} 
+                    />
+                  </Box>
+                </IconButton>
                 <Typography
                   variant="body2"
                   sx={{
@@ -383,24 +405,64 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
                   {user.displayName || user.email}
                 </Typography>
               </Box>
+              
+              {/* Logout Button */}
               <Button
-                    variant="contained"
+                variant="contained"
                 onClick={handleLogout}
                 sx={{
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "0.9rem",
-                      ml: 2, // Add left margin for spacing
-                      background: "linear-gradient(135deg, #7B5AF0 0%, #A78BFA 100%)",
-                      boxShadow: "0 2px 8px rgba(123, 90, 240, 0.3)",
+                  ml: 2,
+                  background: "linear-gradient(135deg, #7B5AF0 0%, #A78BFA 100%)",
+                  boxShadow: "0 2px 8px rgba(123, 90, 240, 0.3)",
                   "&:hover": {
-                        background: "linear-gradient(135deg, #6B4AE0 0%, #9778EA 100%)",
-                        boxShadow: "0 4px 12px rgba(123, 90, 240, 0.4)",
+                    background: "linear-gradient(135deg, #6B4AE0 0%, #9778EA 100%)",
+                    boxShadow: "0 4px 12px rgba(123, 90, 240, 0.4)",
                   },
                 }}
               >
                 Logout
               </Button>
+              
+              {/* User Menu Dropdown */}
+              <Menu
+                anchorEl={userMenuAnchor}
+                open={Boolean(userMenuAnchor)}
+                onClose={handleUserMenuClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                PaperProps={{
+                  sx: {
+                    mt: 1,
+                    minWidth: 200,
+                    backgroundColor: darkMode ? 'rgba(15, 15, 15, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+                    backdropFilter: 'blur(10px)',
+                    border: darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(124, 90, 240, 0.15)',
+                    boxShadow: darkMode ? '0 4px 12px rgba(0, 0, 0, 0.3)' : '0 4px 12px rgba(124, 90, 240, 0.2)',
+                  }
+                }}
+              >
+                <MenuItem
+                  onClick={handleLogout}
+                  sx={{
+                    color: darkMode ? 'white' : '#1B1B1F',
+                    '&:hover': {
+                      backgroundColor: darkMode ? 'rgba(123, 90, 240, 0.15)' : 'rgba(123, 90, 240, 0.1)',
+                    },
+                  }}
+                >
+                  <Icon icon="mdi:logout" style={{ fontSize: '20px', color: '#7B5AF0', marginRight: '12px' }} />
+                  Logout
+                </MenuItem>
+              </Menu>
             </>
           ) : (
             <>
@@ -439,6 +501,27 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
               </NavLink>
             </> 
           )}
+
+            {/* Discord Link */}
+            <IconButton
+              component="a"
+              href="https://discord.gg/z9uvqnVB"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                ml: 1,
+                padding: '8px',
+                backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(124, 90, 240, 0.05)',
+                border: darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(124, 90, 240, 0.1)',
+                '&:hover': {
+                  backgroundColor: darkMode ? 'rgba(123, 90, 240, 0.15)' : 'rgba(123, 90, 240, 0.1)',
+                  transform: 'scale(1.05)',
+                },
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Icon icon="ic:baseline-discord" style={{ color: '#7B5AF0', fontSize: '24px' }} />
+            </IconButton>
 
             <IconButton
               onClick={switchDarkMode}
@@ -676,7 +759,22 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
           <Divider sx={{ my: 2 }} />
 
           {/* Social & Theme Toggle */}
-          <Box sx={{ px: 2, display: 'flex', justifyContent: 'space-around' }}>
+          <Box sx={{ px: 2, display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+            <IconButton
+              component="a"
+              href="https://discord.gg/z9uvqnVB"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                '&:hover': {
+                  backgroundColor: darkMode ? 'rgba(123, 90, 240, 0.15)' : 'rgba(123, 90, 240, 0.1)',
+                  transform: 'scale(1.05)',
+                },
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Icon icon="ic:baseline-discord" style={{ color: '#7B5AF0', fontSize: '28px' }} />
+            </IconButton>
             <IconButton onClick={switchDarkMode}>
               {darkMode ? (
                 <Icon icon="mdi:brightness-7" style={{ color: '#7B5AF0', fontSize: '28px' }} />

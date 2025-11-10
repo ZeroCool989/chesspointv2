@@ -13,6 +13,17 @@ import puzzlesRoutes from './routes/puzzles';
 
 // Load environment variables
 dotenv.config();
+// Also try loading from auth-backend directory explicitly (in case server runs from different directory)
+import path from 'path';
+
+// Try loading .env from auth-backend directory (CommonJS compatible)
+const envPath = path.resolve(process.cwd(), '.env');
+dotenv.config({ path: envPath, override: false }); // override: false means don't overwrite existing vars
+
+console.log('[DEBUG] Current working directory:', process.cwd());
+console.log('[DEBUG] Loading .env from:', envPath);
+console.log('[DEBUG] GMAIL_USER from env:', process.env.GMAIL_USER ? 'Set' : 'NOT SET');
+console.log('[DEBUG] GMAIL_APP_PASSWORD from env:', process.env.GMAIL_APP_PASSWORD ? 'Set' : 'NOT SET');
 
 // Validate required environment variables
 const requiredEnvVars = [
@@ -143,6 +154,8 @@ const startServer = async () => {
       console.log('  POST /auth/login');
       console.log('  POST /auth/refresh');
       console.log('  POST /auth/logout');
+      console.log('  POST /auth/forgot-password');
+      console.log('  POST /auth/reset-password');
       console.log('  GET  /me (protected)');
       console.log('  GET  /music/:fileId (Google Drive proxy)');
       console.log('  GET  /api/puzzles/random');

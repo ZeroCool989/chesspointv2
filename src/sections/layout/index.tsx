@@ -4,6 +4,7 @@ import NavBar from "./NavBar";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { chesspointTheme, chesspointDarkTheme } from "@/theme/chesspointTheme";
 import MusicPlayer from "@/components/MusicPlayer";
+import UniverseChessBackground from "@/components/background/UniverseChessBackground";
 
 export default function Layout({ children }: PropsWithChildren) {
   const [isDarkMode, setDarkMode] = useLocalStorage("useDarkMode", true);
@@ -19,6 +20,7 @@ export default function Layout({ children }: PropsWithChildren) {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <UniverseChessBackground />
       <div className={effectiveDarkMode ? 'dark-mode' : ''}>
         <NavBar
           darkMode={effectiveDarkMode}
