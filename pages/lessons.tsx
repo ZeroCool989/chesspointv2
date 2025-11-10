@@ -122,7 +122,7 @@ export default function Lessons() {
     <Box
       sx={{
         minHeight: '100vh',
-        backgroundColor: darkMode ? '#0F0F0F' : '#FAFAFA',
+        backgroundColor: 'transparent',
         paddingTop: '80px',
         paddingBottom: '40px',
       }}
