@@ -1,7 +1,7 @@
 import { GameEval } from "./eval";
 
 export interface Game {
-  id: number;
+  id: number | string;
   pgn: string;
   event?: string;
   site?: string;

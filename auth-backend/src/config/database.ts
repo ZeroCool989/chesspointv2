@@ -51,6 +51,7 @@ export const connectDatabase = async (): Promise<void> => {
     // Get the actual database name from the connection
     const dbName = mongoose.connection.db?.databaseName || 'unknown';
     console.log(`✓ Connected to MongoDB Atlas (Database: ${dbName})`);
+    console.log(`📌 Models (User, LoginLog, Puzzle) will use this database: ${dbName}`);
 
     // Handle connection events
     mongoose.connection.on('error', (err) => {

@@ -28,7 +28,7 @@ export default function GameDatabase() {
 
   const handleDeleteGameRow = useCallback(
     (id: GridRowId) => async () => {
-      if (typeof id !== "number") {
+      if (typeof id !== "number" && typeof id !== "string") {
         throw new Error("Unable to remove game");
       }
       await deleteGame(id);
@@ -38,10 +38,14 @@ export default function GameDatabase() {
 
   const handleCopyGameRow = useCallback(
     (id: GridRowId) => async () => {
-      if (typeof id !== "number") {
+      if (typeof id !== "number" && typeof id !== "string") {
         throw new Error("Unable to copy game");
       }
-      await navigator.clipboard?.writeText?.(games[id - 1].pgn);
+      // Find game by id (works for both number and string IDs)
+      const game = games.find((g) => g.id === id);
+      if (game) {
+        await navigator.clipboard?.writeText?.(game.pgn);
+      }
     },
     [games]
   );

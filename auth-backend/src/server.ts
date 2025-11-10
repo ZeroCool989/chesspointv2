@@ -4,12 +4,14 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { connectDatabase } from './config/database';
+import { connectGamesDatabase } from './config/gamesDatabase';
 import { authRateLimiter } from './rateLimit';
 import { requestLogger, errorLogger } from './middleware/logger';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
 import musicRoutes from './routes/music';
 import puzzlesRoutes from './routes/puzzles';
+import gamesRoutes from './routes/games';
 
 // Load environment variables
 dotenv.config();
@@ -109,6 +111,7 @@ app.use('/auth', authRateLimiter, authRoutes); // Auth routes with rate limiting
 app.use('/', userRoutes); // User routes (includes /me)
 app.use('/music', musicRoutes); // Music proxy routes (bypasses CORS)
 app.use('/api/puzzles', puzzlesRoutes); // Puzzle routes (public access)
+app.use('/api/games', gamesRoutes); // Game routes (protected, requires auth)
 
 /**
  * 404 handler
@@ -142,6 +145,8 @@ const startServer = async () => {
   try {
     // Try to connect to MongoDB (non-blocking)
     await connectDatabase();
+    // Connect to Games database (gamesDB)
+    await connectGamesDatabase();
 
     // Start Express server regardless of DB connection
     app.listen(PORT, () => {
@@ -162,6 +167,11 @@ const startServer = async () => {
       console.log('  GET  /api/puzzles/themes');
       console.log('  GET  /api/puzzles/:id');
       console.log('  POST /api/puzzles/:id/attempt');
+      console.log('  GET  /api/games (protected)');
+      console.log('  GET  /api/games/:id (protected)');
+      console.log('  POST /api/games (protected)');
+      console.log('  PUT  /api/games/:id/eval (protected)');
+      console.log('  DELETE /api/games/:id (protected)');
     })
     .on('error', (err: any) => {
       if (err.code === 'EADDRINUSE') {
